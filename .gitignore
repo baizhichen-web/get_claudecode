@@ -1,0 +1,40 @@
+# 日志文件
+CLIProxyAPI/auth/logs/
+*.log
+
+# 配置文件（包含敏感信息）
+CLIProxyAPI/config.yaml
+!CLIProxyAPI/config.example.yaml
+
+# 认证文件
+CLIProxyAPI/auth/*.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 其他
+*.zip
+*.tar.gz
