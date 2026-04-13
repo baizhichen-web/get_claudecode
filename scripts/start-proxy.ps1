@@ -21,8 +21,20 @@ if (-not (Test-Path $ExecutablePath)) {
     }
 }
 
-# 检查端口是否被占用
-$port = 8317
+# 从配置文件读取端口
+$configPath = Join-Path $CLIProxyAPIPath "config.yaml"
+$port = 8317  # 默认端口
+if (Test-Path $configPath) {
+    try {
+        $configContent = Get-Content $configPath -Raw
+        $portMatch = [regex]::Match($configContent, '(?m)^port:\s*(\d+)')
+        if ($portMatch.Success) {
+            $port = [int]$portMatch.Groups[1].Value
+        }
+    } catch {
+        Write-Warning "无法读取配置文件，使用默认端口 $port"
+    }
+}
 $portInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
 if ($portInUse) {
     Write-Warning "端口 $port 已被占用，尝试关闭现有进程..."
@@ -45,6 +57,7 @@ if ($Background) {
     Write-Host "服务地址: http://localhost:$port" -ForegroundColor Yellow
     Write-Host "测试连接: Invoke-WebRequest -Uri " -NoNewline
     Write-Host "http://localhost:$port/v1/models" -ForegroundColor Cyan
+    Write-Host "curl http://localhost:$port/v1/models -H `"x-api-key: sk-jarvis`"" -ForegroundColor Cyan
 } else {
     # 前台启动
     Write-Host "按 Ctrl+C 停止服务" -ForegroundColor Yellow

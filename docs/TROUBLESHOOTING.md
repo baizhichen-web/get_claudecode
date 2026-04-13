@@ -165,6 +165,19 @@ $body = @{
 Invoke-WebRequest -Uri "http://localhost:8317/v1/chat/completions" -Method POST -Headers @{"Authorization"="Bearer sk-jarvis"; "Content-Type"="application/json"} -Body $body -UseBasicParsing
 ```
 
+### 7. 429 限流（Too Many Requests）
+
+#### 现象
+API 返回 `429 Too Many Requests` 或 `Too busy`
+
+#### 原因
+免费额度或平台限流。这是正常现象，尤其是 Qwen 等平台的免费模型。
+
+#### 解决
+- **重试即可**：等待几秒后重新请求
+- **配置多账号**：在 `config.yaml` 中设置 `quota-exceeded.switch-project: true`，程序会自动切换账号
+- **避开高峰**：工作日晚间通常是使用高峰期
+
 ## 联系支持
 
 如果以上方法无法解决问题，请：
