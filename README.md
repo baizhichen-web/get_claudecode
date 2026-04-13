@@ -1,8 +1,8 @@
-# Claude Code CLI 本地部署方案
+# 免费使用 Claude Code — 通过 Qwen 每日 1000 次免费请求
 
-通过 CLIProxyAPI 将 Claude Code CLI 连接到各大平台（Qwen、Claude、Gemini 等）的免费额度。
+Qwen（通义千问）为普通用户提供**每日 1,000 次免费请求**，本方案通过 CLIProxyAPI 将 Qwen 的额度转换为 Anthropic 协议，从而让 Claude Code 免费使用。
 
-> **原理**：CLIProxyAPI 可以将各平台授权登录的额度，转换为 OpenAI / Anthropic / Google 三种协议的 API，从而让 Claude Code 等工具调用。
+> **原理**：CLIProxyAPI 可以将 Qwen 授权登录的免费额度，转换为 Anthropic 协议的 API 接口，Claude Code 会以为自己在和官方 API 通信。
 
 ## 快速开始
 
@@ -39,11 +39,10 @@ debug: false
 # 遇到 403/408/500/502/503/504 时自动重试次数
 request-retry: 3
 
-# 多账号配额轮询
+# 配额限制触发时自动切换
 quota-exceeded:
   # 单账号触发 429 时自动切换到下一个账号
   switch-project: true
-  # Gemini 正式版配额用完后自动切换 Preview 模型
   switch-preview-model: true
 
 # 模型别名映射（将底层模型映射为 Claude Code 兼容名称）
@@ -60,25 +59,17 @@ oauth-model-alias:
       fork: true
 ```
 
-### 3. 登录授权
+### 3. Qwen 登录授权
 
-在 `CLIProxyAPI/` 目录下打开终端，执行对应平台的登录命令：
+在 `CLIProxyAPI/` 目录下打开终端（或在文件管理器中右键该文件夹 → 在终端中打开），执行：
 
 ```powershell
-# Qwen 授权
 .\cli-proxy-api.exe -qwen-login
-
-# Claude Code 授权
-.\cli-proxy-api.exe -claude-login
-
-# OpenAI Codex 授权
-.\cli-proxy-api.exe -codex-login
-
-# Gemini CLI 授权
-.\cli-proxy-api.exe -login
 ```
 
-执行后会自动打开浏览器，按照提示登录并授权即可。Token 有效期约 6 小时，程序每 15 分钟自动刷新，无需手动处理。
+程序会自动打开浏览器，登录 Qwen 账号并授权。Token 有效期约 6 小时，程序每 15 分钟自动刷新，无需手动处理。
+
+> **提示**：CLIProxyAPI 还支持 Claude、OpenAI Codex、Gemini 等平台的登录，详见 [CLIProxyAPI GitHub](https://github.com/router-for-me/CLIProxyAPI)。
 
 ### 4. 配置 Claude Code
 
@@ -204,12 +195,61 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 更多故障排除信息，请查看 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)。
 
-## 更新日志
+## 日常使用说明
 
-### v1.0.0
-- 初始版本
-- 支持 Windows 系统
-- 提供安装脚本和文档
+每次使用 Claude Code 时，需要按以下顺序操作：
+
+### 第一步：确保 Qwen 已登录
+
+打开 `CLIProxyAPI/` 目录，双击运行 `cli-proxy-api.exe`。
+
+如果看到以下日志，说明服务已启动成功：
+```
+API server started successfully on: :8317
+server clients and configuration updated: 1 clients (1 auth entries ...)
+```
+
+如果没有看到 `1 clients`，说明 Qwen 未登录或 Token 已过期，需要在终端中重新执行：
+```powershell
+.\cli-proxy-api.exe -qwen-login
+```
+
+### 第二步：启动代理服务
+
+方式一：直接双击 `CLIProxyAPI/cli-proxy-api.exe`（推荐，最简单）
+
+方式二：使用启动脚本（会自动处理端口占用问题）：
+```powershell
+.\scripts\start-proxy.ps1
+```
+
+方式三：后台运行（关闭窗口后服务仍在运行）：
+```powershell
+.\scripts\start-proxy.ps1 -Background
+```
+
+### 第三步：使用 Claude Code
+
+打开新的终端窗口，直接运行：
+```powershell
+claude
+```
+
+Claude Code 会通过本地代理（localhost:8317）调用 Qwen 的免费额度。
+
+### 第四步：停止服务
+
+- 如果是在终端窗口启动的 `cli-proxy-api.exe`，直接关闭窗口即可停止。
+- 如果使用脚本后台运行，可以运行以下命令停止：
+  ```powershell
+  Get-Process | Where-Object { $_.ProcessName -like "*cli-proxy*" } | Stop-Process
+  ```
+
+### 注意事项
+
+- **429 限流**：免费额度高峰期会出现 429 Too Many Requests，重试即可。
+- **Token 过期**：Qwen Token 有效期约 6 小时，过期后需要重新登录授权。
+- **每次使用前**：都需要先启动 `cli-proxy-api.exe`，否则 Claude Code 无法连接。
 
 ## 许可证
 
