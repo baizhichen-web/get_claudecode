@@ -4,7 +4,6 @@ CLIProxyAPI/auth/logs/
 
 # 配置文件（包含敏感信息）
 CLIProxyAPI/config.yaml
-!CLIProxyAPI/config.example.yaml
 
 # 认证文件
 CLIProxyAPI/auth/*.json

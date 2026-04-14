@@ -105,10 +105,11 @@ if (-not $SkipClaudeCodeInstall) {
     Write-Host ""
     Write-Host "[5/5] 检查 Claude Code CLI..." -ForegroundColor Yellow
     
-    try {
-        $claudeVersion = claude --version 2>$null
+    $claudeCheck = Get-Command claude -ErrorAction SilentlyContinue
+    if ($claudeCheck) {
+        $claudeVersion = & claude --version 2>$null
         Write-Host "  Claude Code CLI 已安装: $claudeVersion" -ForegroundColor Green
-    } catch {
+    } else {
         Write-Host "  请手动安装 Claude Code CLI:" -ForegroundColor Yellow
         Write-Host "    npm install -g @anthropic-ai/claude-code" -ForegroundColor White
     }

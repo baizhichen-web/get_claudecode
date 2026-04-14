@@ -37,9 +37,27 @@ if (Test-Path $configPath) {
 }
 $portInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
 if ($portInUse) {
-    Write-Warning "端口 $port 已被占用，尝试关闭现有进程..."
-    Get-Process | Where-Object { $_.ProcessName -like "*cli-proxy*" -or $_.ProcessName -like "*CLIProxy*" } | Stop-Process -Force
-    Start-Sleep -Seconds 2
+    Write-Warning "端口 $port 已被占用，尝试关闭占用该端口的进程..."
+    $portInUse | ForEach-Object {
+        $pid = $_.OwningProcess
+        $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+        if ($proc) {
+            Write-Host "  结束进程: $($proc.ProcessName) (PID: $pid)" -ForegroundColor Gray
+            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+        }
+    }
+    # 等待端口释放
+    $retries = 5
+    while ($retries -gt 0) {
+        Start-Sleep -Seconds 1
+        $stillInUse = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
+        if (-not $stillInUse) { break }
+        $retries--
+    }
+    if ($retries -eq 0) {
+        Write-Warning "端口 $port 仍被占用，请手动处理或更换端口"
+        exit 1
+    }
 }
 
 Write-Host "正在启动 CLIProxyAPI 服务..." -ForegroundColor Cyan
