@@ -107,15 +107,13 @@ oauth-model-alias:
 ### 5. 启动服务
 
 ```powershell
-# 方式一：使用启动脚本（推荐）
+# 方式一：直接双击 CLIProxyAPI/cli-proxy-api.exe（最简单）
+
+# 方式二：使用启动脚本
 .\scripts\start-proxy.ps1
 
-# 方式二：后台运行
+# 方式三：后台运行
 .\scripts\start-proxy.ps1 -Background
-
-# 方式三：手动启动
-cd CLIProxyAPI
-.\cli-proxy-api.exe
 ```
 
 启动成功后会看到以下日志：
@@ -210,18 +208,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 **原因**：Qwen 的 Token 已过期（有效期约 6 小时），CLIProxyAPI 无法代表你调用 Qwen 的 API。
 
-**检查方法**：
-在终端中输入以下命令检查 Token 状态：
-```powershell
-curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
-```
-如果返回错误或提示认证失败，说明 Token 已过期。
+**检查方法**：同「步骤 6：验证连接」中的 curl 命令，如果返回错误或 503，说明 Token 已过期。
 
 **解决**：重新执行 Qwen 登录授权：
 ```powershell
 .\cli-proxy-api.exe -qwen-login
 ```
 授权完成后重启服务即可。
+
+> **推荐**：使用 `.\scripts\start-claude.ps1` 启动 Claude Code，它会自动检查 Token 状态并在过期时引导你登录。
 
 ### 问题：端口被占用
 
@@ -271,7 +266,7 @@ claude
 - 终端窗口启动的：直接关闭窗口
 - 脚本后台启动的：
   ```powershell
-  Get-Process | Where-Object { $_.ProcessName -like "*cli-proxy*" } | Stop-Process
+  Get-Process | Where-Object { $_.ProcessName -like "*cli-proxy*" -or $_.ProcessName -like "*CLIProxy*" } | Stop-Process
   ```
 
 ### 注意事项
