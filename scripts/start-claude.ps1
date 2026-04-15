@@ -24,16 +24,17 @@ if (Test-Path $configPath) {
 $apiUrl = "http://localhost:$port/v1/models"
 
 # 检查代理服务是否运行
-$proxyRunning = $null
+$tokenExpired = $false
+$proxyRunning = $true
 try {
-    $response = Invoke-WebRequest -Uri $apiUrl -Headers @{"x-api-key" = "sk-jarvis"} -UseBasicParsing -TimeoutSec 5
-    $proxyRunning = $true
+    $null = Invoke-WebRequest -Uri $apiUrl -Headers @{"x-api-key" = "sk-jarvis"} -UseBasicParsing -TimeoutSec 5
 } catch {
-    if ($_.Exception.Response.StatusCode -eq 503) {
+    $statusCode = $_.Exception.Response.StatusCode
+    if ($statusCode -and ([int]$statusCode -eq 503)) {
         # 服务运行但 Token 过期
-        $proxyRunning = $true
         $tokenExpired = $true
     } else {
+        # 服务未运行或无法连接
         $proxyRunning = $false
     }
 }
