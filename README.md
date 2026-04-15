@@ -233,56 +233,43 @@ curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
 
 ## 日常使用说明
 
-每次使用 Claude Code 时，需要按以下顺序操作：
+### 推荐方式：一键启动（自动检查 Token）
 
-### 第一步：确保 Qwen 已登录
+直接运行项目提供的启动脚本，它会自动检查服务状态和 Token 有效期，过期时会引导你重新登录：
+
+```powershell
+.\scripts\start-claude.ps1
+```
+
+脚本会自动完成：检查代理服务是否运行 → 检查 Token 是否过期 → 如过期则引导登录 → 启动 Claude Code。
+
+### 手动方式（适合需要排查问题的用户）
+
+#### 1. 启动代理服务
 
 打开 `CLIProxyAPI/` 目录，双击运行 `cli-proxy-api.exe`。
 
-如果看到以下日志，说明服务已启动成功：
+看到以下日志说明启动成功：
 ```
 API server started successfully on: :8317
 server clients and configuration updated: 1 clients (1 auth entries ...)
 ```
 
-如果没有看到 `1 clients`，说明 Qwen 未登录或 Token 已过期，需要在终端中重新执行：
-```powershell
-.\cli-proxy-api.exe -qwen-login
-```
-
-> **快速检查 Token 是否过期**：
+> 如果显示 `0 clients`，说明 Qwen 未登录或 Token 已过期，关闭服务后重新执行：
 > ```powershell
-> curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
+> .\cli-proxy-api.exe -qwen-login
 > ```
-> 如果返回错误或 503，说明 Token 已过期，重新登录即可。
 
-### 第二步：启动代理服务
+#### 2. 启动 Claude Code
 
-方式一：直接双击 `CLIProxyAPI/cli-proxy-api.exe`（推荐，最简单）
-
-方式二：使用启动脚本（会自动处理端口占用问题）：
-```powershell
-.\scripts\start-proxy.ps1
-```
-
-方式三：后台运行（关闭窗口后服务仍在运行）：
-```powershell
-.\scripts\start-proxy.ps1 -Background
-```
-
-### 第三步：使用 Claude Code
-
-打开新的终端窗口，直接运行：
 ```powershell
 claude
 ```
 
-Claude Code 会通过本地代理（localhost:8317）调用 Qwen 的免费额度。
+#### 3. 停止服务
 
-### 第四步：停止服务
-
-- 如果是在终端窗口启动的 `cli-proxy-api.exe`，直接关闭窗口即可停止。
-- 如果使用脚本后台运行，可以运行以下命令停止：
+- 终端窗口启动的：直接关闭窗口
+- 脚本后台启动的：
   ```powershell
   Get-Process | Where-Object { $_.ProcessName -like "*cli-proxy*" } | Stop-Process
   ```
@@ -290,8 +277,8 @@ Claude Code 会通过本地代理（localhost:8317）调用 Qwen 的免费额度
 ### 注意事项
 
 - **429 限流**：免费额度高峰期会出现 429 Too Many Requests，重试即可。
-- **Token 过期**：Qwen Token 有效期约 6 小时，过期后需要重新登录授权。
-- **每次使用前**：都需要先启动 `cli-proxy-api.exe`，否则 Claude Code 无法连接。
+- **Token 过期**：Qwen Token 有效期约 6 小时，过期后需重新登录授权。如果 Claude Code 突然报错，先检查这个。
+- **每次使用前**：需要先启动 `cli-proxy-api.exe`，否则 Claude Code 无法连接。
 
 ## 许可证
 
