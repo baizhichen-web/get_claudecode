@@ -165,7 +165,30 @@ $body = @{
 Invoke-WebRequest -Uri "http://localhost:8317/v1/chat/completions" -Method POST -Headers @{"Authorization"="Bearer sk-jarvis"; "Content-Type"="application/json"} -Body $body -UseBasicParsing
 ```
 
-### 7. 429 限流（Too Many Requests）
+### 7. 503 服务不可用（Token 过期）
+
+#### 现象
+返回 `503 Service Unavailable`，Claude Code 持续报错或无法连接。
+
+#### 原因
+Qwen 的 Token 已过期（有效期约 6 小时），CLIProxyAPI 无法代表你调用 Qwen 的 API。
+
+#### 检查方法
+```powershell
+curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
+```
+如果返回错误或提示认证失败，说明 Token 已过期。
+
+#### 解决
+重新执行 Qwen 登录授权：
+```powershell
+.\cli-proxy-api.exe -qwen-login
+```
+授权完成后，重启 `cli-proxy-api.exe` 服务即可。
+
+> **提示**：如果频繁遇到 503，说明你的使用间隔超过了 6 小时，需要记得每次使用前重新登录。
+
+### 8. 429 限流（Too Many Requests）
 
 #### 现象
 API 返回 `429 Too Many Requests` 或 `Too busy`

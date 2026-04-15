@@ -204,6 +204,25 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 **解决**：服务太忙，重试即可。如果配置了多账号，程序会自动切换到下一个账号。
 
+### 问题：503 服务不可用（Token 过期）
+
+**现象**：返回 503 Service Unavailable，Claude Code 无法连接或持续报错。
+
+**原因**：Qwen 的 Token 已过期（有效期约 6 小时），CLIProxyAPI 无法代表你调用 Qwen 的 API。
+
+**检查方法**：
+在终端中输入以下命令检查 Token 状态：
+```powershell
+curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
+```
+如果返回错误或提示认证失败，说明 Token 已过期。
+
+**解决**：重新执行 Qwen 登录授权：
+```powershell
+.\cli-proxy-api.exe -qwen-login
+```
+授权完成后重启服务即可。
+
 ### 问题：端口被占用
 
 **现象**：显示 `Only one usage of each socket address`
@@ -230,6 +249,12 @@ server clients and configuration updated: 1 clients (1 auth entries ...)
 ```powershell
 .\cli-proxy-api.exe -qwen-login
 ```
+
+> **快速检查 Token 是否过期**：
+> ```powershell
+> curl http://localhost:8317/v1/models -H "x-api-key: sk-jarvis"
+> ```
+> 如果返回错误或 503，说明 Token 已过期，重新登录即可。
 
 ### 第二步：启动代理服务
 
