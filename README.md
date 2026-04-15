@@ -102,7 +102,12 @@ oauth-model-alias:
 }
 ```
 
-> **注意**：确保只使用 `ANTHROPIC_API_KEY`，不要同时设置 `ANTHROPIC_AUTH_TOKEN`，否则会报认证冲突。
+> **注意**：如果之前通过 OAuth 登录过 Claude Code，需要先清理冲突的 Token：
+> 1. 编辑 `C:\Users\<用户名>\.claude\settings.json`，删除 `ANTHROPIC_AUTH_TOKEN` 这一行
+> 2. 或在终端执行：
+>    ```powershell
+>    [Environment]::SetEnvironmentVariable('ANTHROPIC_AUTH_TOKEN', $null, 'User')
+>    ```
 
 ### 5. 启动服务
 
